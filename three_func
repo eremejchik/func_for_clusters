@@ -1,0 +1,41 @@
+def hamming_distance(seq1, seq2): 
+    #функция, которая вычисляет расстояние Хэмминга 
+    #между двумя выровненными последовательностями
+    return sum(a != b for a,b in zip(seq1,seq2))
+
+def hamming_distance_file(input_file):
+    #Вычисляет расстояние Хэмминга между всеми ПАРАМИ
+    #выровненных последовательностей в файле
+    seq = []
+    with open(input_file, 'r') as f:
+        for line in f:
+            seq.append(line.strip())
+            distances = []
+        for i in range(len(seq)):
+            for j in range(i+1,len(seq)):
+                dist = hamming_distance(seq[i],seq[j])
+                distances.append((seq[i],seq[j], dist))
+            
+    return distances #возвращает список кортежей, 
+#в котором каждый кортеж содержит на первой позиции выровненную последовательность,
+#на второй позиции - вторая сравниваемая выровненная последовательность,
+#а на третьей значение расстояния Хэмминга между этой парой последовательностей
+
+seq_list = hamming_distance_file('seqs123.txt') 
+#применяем функцию к файлу с последовательностями, 
+#в котором каждая новая строка - новая последовательность
+
+import scipy.cluster.hierarchy as sch
+import numpy as np
+
+def cluster_data(data):
+    #создание матрицы расстояний между последовательностями
+    distances = np.array([item[2] for item in data])
+    seq1 = np.array([item[0] for item in data])
+    seq2 = np.array([item[1] for item in data])
+    #иерархическая кластеризация
+    linkage_matrix = sch.linkage(distances, method = 'ward')
+    #построение дендрограммы
+    sch.dendrogram(linkage_matrix, color_threshold = np.max(distances))
+    
+    cluster_data(seq_list) #вызвав функцию cluster_data к полученному списку кортежей, мы получим дендрограмму
